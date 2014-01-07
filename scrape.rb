@@ -17,7 +17,10 @@ countries = [{:country => "US", :pages => 303,  :cc => '1'},
 # browser.goto "http://shops.oscommerce.com/directory?country=US"
 list = []
 
+# /\b(?:\+?|\b)[0-9]{10}\b/
+
 phone_regex = /\b[\s()\d-]{6,}\d\b/
+email_regex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/
 
 # A store: 
 
@@ -71,14 +74,20 @@ countries.each do |country|
           next
         end
 
-        binding.pry
+        # binding.pry
         contact_page = html.at('a:contains("ontact")').attributes["href"].value
         html = Nokogiri::HTML(open(contact_page))
 
         phones = html.to_s.scan(phone_regex)
-        puts phone 
-        emails = html.to_s.scan()
+        puts phones
+        emails = html.to_s.scan(email_regex)
         puts emails
+
+        # How do we extract?
+
+        phone, email = phones.first, emails.first
+
+
 
         site = {:Name        => name, 
                 :Link        => link, 
