@@ -13,13 +13,13 @@ browser = Watir::Browser.new :chrome
 countries = [{:country => "US", :pages => 303,  :cc => '1'},
              {:country => "CA", :pages => 35,   :cc => '1'}, 
              {:country => "AU", :pages => 45,   :cc => '61'}, 
-             {:country => "UK", :pages => 1085, :cc => '41'}]
+             {:country => "GB", :pages => 146,  :cc => '41'}]
 # browser.goto "http://shops.oscommerce.com/directory?country=US"
 list = []
 
-# /\b(?:\+?|\b)[0-9]{10}\b/
+# /\b[\s()\d-]{6,}\d\b/
 
-phone_regex = /\b[\s()\d-]{6,}\d\b/
+phone_regex = /\b(?:\+?|\b)[0-9]{10}\b/
 email_regex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/
 
 # A store: 
@@ -46,7 +46,6 @@ countries.each do |country|
 
         puts category
         
-        
         html = Nokogiri::HTML(open(li.a.href))
         link = html.xpath("//frame").first.attributes["src"].value
         link.slice! "live_shops_frameset_header.php?url="
@@ -61,9 +60,13 @@ countries.each do |country|
         # ap contact = contact.registrant_contact.first
 
         # email = contact.email if contact.respond_to? "email"
-        if contact.respond_to? "email"
-          owner_email = contact.email
+
+        begin
+          owner_email = contact.phone
           owner_phone = contact.phone
+        rescue 
+          owner_email = ""
+          owner_phone = ""
         end
 
         begin
@@ -76,7 +79,14 @@ countries.each do |country|
 
         # binding.pry
         contact_page = html.at('a:contains("ontact")').attributes["href"].value
-        html = Nokogiri::HTML(open(contact_page))
+
+        begin
+          html = Nokogiri::HTML(open(contact_page))          
+        rescue 
+          site = {:Name => name }
+          list << site
+          next
+        end
 
         phones = html.to_s.scan(phone_regex)
         puts phones
@@ -85,9 +95,8 @@ countries.each do |country|
 
         # How do we extract?
 
-        phone, email = phones.first, emails.first
-
-
+        phone = phones.select { |p| Phony.plausible? p }
+        email = emails.first
 
         site = {:Name        => name, 
                 :Link        => link, 
@@ -97,11 +106,16 @@ countries.each do |country|
                 :Country     => country[:country],
                 :Email       => email,
                 :Phone       => phone }
+
         list << site
       end
     end
   end
 end
+
+# ["Name", "Link", "Type", "Owner_Email", "Owner_Phone", "Country", "Email", "Phone"]
+
+browser.quit
 
 puts list 
 
@@ -112,4 +126,3 @@ CSV.open("data.csv", "wb") do |csv|
   end
 end
 
-browser.quit
