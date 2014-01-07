@@ -8,7 +8,7 @@ require "domainatrix"
 require "awesome_print"
 require "pry"
 
-browser = Watir::Browser.new :chrome 
+# browser = Watir::Browser.new :chrome 
 
 countries = [{:country => "US", :pages => 303,  :cc => '1'},
              {:country => "CA", :pages => 35,   :cc => '1'}, 
@@ -30,8 +30,9 @@ phone_regex = /\b[\s()\d-]{6,}\d\b/
 # puts browser.table(:index, 4).exists?
 countries.each do |country|
   country[:pages].times do |page|
-    browser.goto "http://shops.oscommerce.com/directory?page=#{page + 1}&country=#{country[:country]}"
-    table = browser.table(:index, 2)
+    # browser.goto "http://shops.oscommerce.com/directory?page=#{page + 1}&country=#{country[:country]}"
+    shops = Nokogiri::HTML(open("http://shops.oscommerce.com/directory?page=#{page + 1}&country=#{country[:country]}"))
+    table = shops.css()
 
     table.uls.each do |ul|
       ul.lis.each do |li|
@@ -103,4 +104,4 @@ CSV.open("data.csv", "wb") do |csv|
   end
 end
 
-browser.quit
+# browser.quit
