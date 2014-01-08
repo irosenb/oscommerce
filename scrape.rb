@@ -30,7 +30,7 @@ email_regex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/
 # Phone:
 # X Country
 
-# puts browser.table(:index, 4).exists?
+
 countries.each do |country|
   country[:pages].times do |page|
     browser.goto "http://shops.oscommerce.com/directory?page=#{page + 1}&country=#{country[:country]}"
@@ -39,7 +39,7 @@ countries.each do |country|
     table.uls.each do |ul|
       ul.lis.each do |li|
         name = li.a.text
-        li.a.href
+        li.a.href 
 
         category = li.text
         category.slice! "#{li.a.text}\n"
@@ -54,44 +54,45 @@ countries.each do |country|
         domain = Domainatrix.parse(link)
         domain = "#{domain.domain}.#{domain.public_suffix}"
 
-        whois = Whois.whois(domain)
-        contact = whois.parser
-        next if contact.available?
         # ap contact = contact.registrant_contact.first
 
         # email = contact.email if contact.respond_to? "email"
 
         begin
+          whois = Whois.whois(domain)
+          contact = whois.parser
           owner_email = contact.phone
           owner_phone = contact.phone
         rescue 
           owner_email = ""
           owner_phone = ""
+          puts "no domain owner's phone/email found"
         end
 
         begin
           html = Nokogiri::HTML(open(link))
         rescue
-          site = {:Name => name }
+          puts "link did not work"
+          site = {:Name => name, :Link => "Possibly defunct"}
           list << site
           next
         end
 
         # binding.pry
-        contact_page = html.at('a:contains("ontact")').attributes["href"].value
 
         begin
+          contact_page = html.at('a:contains("ontact")').attributes["href"].value
           html = Nokogiri::HTML(open(contact_page))          
+          phones = html.to_s.scan(phone_regex)
+          puts phones
+          emails = html.to_s.scan(email_regex)
+          puts emails
         rescue 
-          site = {:Name => name }
-          list << site
-          next
+          puts "no emails/phones found"
+          emails = []
+          phones = []
         end
 
-        phones = html.to_s.scan(phone_regex)
-        puts phones
-        emails = html.to_s.scan(email_regex)
-        puts emails
 
         # How do we extract?
 
