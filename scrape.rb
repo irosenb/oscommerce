@@ -54,7 +54,7 @@ countries.each do |country|
 
       begin
         whois = Whois.whois(domain)
-        contact = whois.registrant_contact
+        contact = whois.registrant_contact.first
         owner_email = contact.email
         owner_phone = contact.phone
       rescue 
@@ -119,4 +119,4 @@ CSV.open("data.csv", "wb") do |csv|
   list.each do |item|
     csv << item.values
   end
-end
+end 
