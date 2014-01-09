@@ -54,7 +54,7 @@ countries.each do |country|
 
       begin
         whois = Whois.whois(domain)
-        contact = whois.parser
+        contact = whois.registrant_contact
         owner_email = contact.email
         owner_phone = contact.phone
       rescue 
