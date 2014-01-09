@@ -41,7 +41,7 @@ countries.each do |country|
       puts category
       
       html = Nokogiri::HTML(open(iframe_url))
-      link = html.xpath("//frame").first.attributes["src"].value
+      link = html.xpath("//frame").first.attributes["<sr></sr>c"].value
       link.slice! "live_shops_frameset_header.php?url="
       puts link
       
@@ -55,7 +55,7 @@ countries.each do |country|
       begin
         whois = Whois.whois(domain)
         contact = whois.parser
-        owner_email = contact.phone
+        owner_email = contact.email
         owner_phone = contact.phone
       rescue 
         owner_email = ""
@@ -90,6 +90,7 @@ countries.each do |country|
       # How do we extract?
 
       phone = phones.select { |p| Phony.plausible? p }
+      phone.uniq!
       email = emails.first
 
       site = {:Name        => name, 
@@ -101,12 +102,14 @@ countries.each do |country|
               :Email       => email,
               :Phone       => phone }
 
+      puts site 
+
       list << site
     end
   end
 end
 
-# ["Name", "Link", "Type", "Owner_Email", "Owner_Phone", "Country", "Email", "Phone"]
+# ["Name", "Link", "Type", "Owner Email", "Owner Phone", "Country", "Email", "Phone"]
 
 
 puts list 
