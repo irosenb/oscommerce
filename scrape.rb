@@ -91,7 +91,7 @@ countries.each do |country|
 
       phone = phones.select { |p| Phony.plausible? p }
       phone.uniq!
-      email = emails.first
+      email = emails.empty? ? "" : emails.first 
 
       site = {:Name        => name, 
               :Link        => link, 
