@@ -43,20 +43,21 @@ countries.each do |country|
         puts category
         
         html = Nokogiri::HTML(open(iframe_url))
-        link = html.xpath("//frame").first.attributes["<sr></sr>c"].value
+        link = html.xpath("//frame").first.attributes["src"].value
         link.slice! "live_shops_frameset_header.php?url="
         puts link
         
         domain = Domainatrix.parse(link)
         domain = "#{domain.domain}.#{domain.public_suffix}"
 
+        puts domain
         # ap contact = contact.registrant_contact.first
 
         # email = contact.email if contact.respond_to? "email"
 
         begin
           whois = Whois.whois(domain)
-          contact = whois.registrant_contact.first
+          contact = whois.registrant_contact
           owner_email = contact.email
           owner_phone = contact.phone
         rescue 
